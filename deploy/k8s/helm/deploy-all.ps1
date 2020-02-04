@@ -104,10 +104,10 @@ $useCustomRegistry=$false
 
 if (-not [string]::IsNullOrEmpty($registry)) {
     $useCustomRegistry=$true
-    if ([string]::IsNullOrEmpty($dockerUser) -or [string]::IsNullOrEmpty($dockerPassword)) {
-        Write-Host "Error: Must use -dockerUser AND -dockerPassword if specifying custom registry" -ForegroundColor Red
-        exit 1
-    }
+    # if ([string]::IsNullOrEmpty($dockerUser) -or [string]::IsNullOrEmpty($dockerPassword)) {
+    #     Write-Host "Error: Must use -dockerUser AND -dockerPassword if specifying custom registry" -ForegroundColor Red
+    #     exit 1
+    # }
 }
 
 Write-Host "Begin eShopOnContainers installation using Helm" -ForegroundColor Green
