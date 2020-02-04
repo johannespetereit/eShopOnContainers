@@ -3,7 +3,7 @@ clusterName: eshop-aks
 pathBase: /
 
 image:
-  repository: eshop/webspa
+  repository: eshop-webspa
   tag: latest
   pullPolicy: IfNotPresent
 

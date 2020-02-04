@@ -3,7 +3,7 @@ clusterName: eshop-aks
 pathBase: /webmvc
 
 image:
-  repository: eshop/webmvc
+  repository: eshop-webmvc
   tag: latest
   pullPolicy: IfNotPresent
 

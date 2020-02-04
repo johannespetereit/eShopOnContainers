@@ -3,7 +3,7 @@ clusterName: eshop-aks
 pathBase: /ordering-api
 
 image:
-  repository: eshop/ordering.api
+  repository: eshop-ordering.api
   tag: latest
   pullPolicy: IfNotPresent
 

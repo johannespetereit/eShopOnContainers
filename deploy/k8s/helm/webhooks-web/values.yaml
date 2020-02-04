@@ -3,7 +3,7 @@ clusterName: eshop-aks
 pathBase: /webhooks-web
 
 image:
-  repository: eshop/webhooks.client
+  repository: eshop-webhooks.client
   tag: latest
   pullPolicy: IfNotPresent
 

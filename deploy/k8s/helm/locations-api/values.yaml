@@ -3,7 +3,7 @@ clusterName: eshop-aks
 pathBase: /locations-api
 
 image:
-  repository: eshop/locations.api
+  repository: eshop-locations.api
   tag: latest
   pullPolicy: IfNotPresent
 

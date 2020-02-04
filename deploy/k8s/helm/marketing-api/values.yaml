@@ -3,7 +3,7 @@ clusterName: eshop-aks
 pathBase: /marketing-api
 
 image:
-  repository: eshop/marketing.api
+  repository: eshop-marketing.api
   tag: latest
   pullPolicy: IfNotPresent
 
