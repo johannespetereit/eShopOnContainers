@@ -41,7 +41,7 @@ inf:
     constr: rabbitmq        # Event bus connection string
     useAzure: false         # true if use Azure Service Bus. False if RabbitMQ
   appinsights:
-      key: ""               # App insights to use
+      key: "d6e85028-d2b0-4ea6-b9b4-91a7fcf6a540"               # App insights to use
   k8s:                      # inf.k8s defines Kubernetes cluster global config
     dns:  ""                # k8s external  DNS. This value or ip value MUST BE PROVIDED
     local: false            # True when deploying on "local K8s" provided by Docker Desktop.
