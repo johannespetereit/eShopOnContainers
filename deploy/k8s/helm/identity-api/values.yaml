@@ -71,14 +71,14 @@ env:
 probes:
   liveness:
     path: /liveness
-    initialDelaySeconds: 10
+    initialDelaySeconds: 80
     periodSeconds: 15
     port: 80
   readiness:
     path: /hc
-    timeoutSeconds: 5
-    initialDelaySeconds: 90
-    periodSeconds: 60
+    timeoutSeconds: 20
+    initialDelaySeconds: 60
+    periodSeconds: 10
     port: 80
 
 enableDevspaces: "false"
