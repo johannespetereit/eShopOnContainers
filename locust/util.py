@@ -10,12 +10,10 @@ def dump(name,response):
     json_string = json.dumps(dict, default=lambda o: o.__dict__ if hasattr(o, '__dict__') else 'not serializable', indent=4)
     timestamp = datetime.now().strftime("%Y-%m-%d-%H_%M_%S")  
     dir = os.path.dirname(os.path.realpath(__file__))
-    request_file = os.path.join(dir, 'out', timestamp + "_" + str(response.status_code) + "_" + response.request.method + ".json")
-    
-    with open(r'D:\tmp.html','w+') as f: f.write(response.text)
-
-    with open(request_file, 'w+') as file:
-        file.write(json_string)
+    # request_file = os.path.join(dir, 'out', timestamp + "_" + str(response.status_code) + "_" + response.request.method + ".json")
+    # with open(r'D:\tmp.html','w+') as f: f.write(response.text)
+    # with open(request_file, 'w+') as file:
+    #     file.write(json_string)
 
 
 def guard_response(response):
