@@ -20,8 +20,8 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Data
     {
         private readonly IPasswordHasher<ApplicationUser> _passwordHasher = new PasswordHasher<ApplicationUser>();
 
-        public async Task SeedAsync(ApplicationDbContext context,IWebHostEnvironment env,
-            ILogger<ApplicationDbContextSeed> logger, IOptions<AppSettings> settings,int? retry = 0)
+        public async Task SeedAsync(ApplicationDbContext context, IWebHostEnvironment env,
+            ILogger<ApplicationDbContextSeed> logger, IOptions<AppSettings> settings, int? retry = 0)
         {
             int retryForAvaiability = retry.Value;
 
@@ -30,18 +30,30 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Data
                 var useCustomizationData = settings.Value.UseCustomizationData;
                 var contentRootPath = env.ContentRootPath;
                 var webroot = env.WebRootPath;
-
+                logger.LogInformation($"deleting {context.Users.Count()} users...");
+                context.Users.RemoveRange(context.Users);
+                context.SaveChanges();
+                logger.LogInformation($"deleted users.");
                 if (!context.Users.Any())
                 {
+                    logger.LogInformation($"Adding Users...");
                     context.Users.AddRange(useCustomizationData
                         ? GetUsersFromFile(contentRootPath, logger)
                         : GetDefaultUser());
+                    logger.LogInformation($"Got {context.Users.Count()} users, saving...");
 
                     await context.SaveChangesAsync();
+                    logger.LogInformation($"Got {context.Users.Count()} users, saved successfully.");
+
+                }
+                else
+                {
+                    logger.LogInformation($"No users added, already have {context.Users.Count()} users!");
                 }
 
                 if (useCustomizationData)
                 {
+                    logger.LogInformation($"Adding images...");
                     GetPreconfiguredImages(contentRootPath, webroot, logger);
                 }
             }
@@ -50,16 +62,17 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Data
                 if (retryForAvaiability < 10)
                 {
                     retryForAvaiability++;
-                    
+
                     logger.LogError(ex, "EXCEPTION ERROR while migrating {DbContextName}", nameof(ApplicationDbContext));
 
-                    await SeedAsync(context,env,logger,settings, retryForAvaiability);
+                    await SeedAsync(context, env, logger, settings, retryForAvaiability);
                 }
             }
         }
 
         private IEnumerable<ApplicationUser> GetUsersFromFile(string contentRootPath, ILogger logger)
         {
+            logger.LogInformation("start reading csv");
             string csvFileUsers = Path.Combine(contentRootPath, "Setup", "Users.csv");
 
             if (!File.Exists(csvFileUsers))
@@ -85,13 +98,15 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Data
                 return GetDefaultUser();
             }
 
-            List<ApplicationUser> users = File.ReadAllLines(csvFileUsers)
-                        .Skip(1) // skip header column
-                        .Select(row => Regex.Split(row, ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)") )
+            var lines = File.ReadAllLines(csvFileUsers);
+            logger.LogInformation("read csv, building users...");
+            var users = lines.Skip(1) // skip header column
+                        .Select(row => Regex.Split(row, ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"))
                         .SelectTry(column => CreateApplicationUser(column, csvheaders))
                         .OnCaughtException(ex => { logger.LogError(ex, "EXCEPTION ERROR: {Message}", ex.Message); return null; })
                         .Where(x => x != null)
                         .ToList();
+            logger.LogInformation("built users.");
 
             return users;
         }
