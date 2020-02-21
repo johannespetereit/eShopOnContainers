@@ -7,8 +7,8 @@ from urllib.parse import parse_qs
 from util import dump, guard_response
 from auth import oauth_login
 import inspect
-
-user_file_path = r'D:\dev\basta\eShopOnContainers\src\Services\Identity\Identity.API\Setup\Users.csv'
+dir = os.path.dirname(os.path.realpath(__file__))
+user_file_path = os.path.join(dir, 'Users.csv')
 
 class Executor:
     def __init__(self, locust, debug = False):
@@ -80,8 +80,8 @@ class Executor:
     def perform_login(self):
         self.log_call()
         if (self.is_logged_in): return
-        username = self.locust.user_info["email"]
-        password = self.locust.user_info["password"]
+        username = self.locust.user_info["Email"]
+        password = self.locust.user_info["Password"]
         self.access_token = oauth_login(self.client, username, password)
         self.auth = 'Bearer ' + self.access_token
         self.headers = {'Authorization': self.auth}
@@ -288,7 +288,7 @@ class WebsiteTasks(TaskSet):
                 self.interrupt()
 
 users = []
-with codecs.open(user_file_path, 'r', 'utf-16') as csv_file:
+with codecs.open(user_file_path, 'r', 'utf-16-le') as csv_file:
     reader = csv.DictReader(csv_file)
     for row in reader:
         users.append(row)
@@ -301,7 +301,7 @@ class WebsiteUser(HttpLocust):
         self.user_info = None
         user_index += 1
         if user_index < len(users):
-            print("setting user", str(user_index))
+            print("setting user", str(user_index), users[user_index]["Email"])
             self.user_info = users[user_index]
         else:
             print("too many users", str(user_index), ", available:", len(users))
@@ -313,16 +313,7 @@ class WebsiteUser(HttpLocust):
     # task_set = TestTasks
     wait_time = between(4, 12)
 
-# x = WebsiteUser()
-# x.run()
-
-
-
-
-
-
-
-
-
-
+if len(sys.argv) > 1 and sys.argv[1] == '-i':
+    x = WebsiteUser()
+    x.run()
 
