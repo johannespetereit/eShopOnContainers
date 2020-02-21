@@ -1,0 +1,97 @@
+Name: locust
+
+pathBase: /locust
+
+image:
+  repository: greenbirdit/locust
+  tag: 0.13.2
+  # tag: 0.9.0
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+service:
+  name: master-web
+  type: ClusterIP
+  externalPort: 8089
+  internalPort: 8089
+  nodePort: 0
+  annotations: {}
+  extraLabels: {}
+
+# extra volumes, volumeMounts and envs for both worker and master pods
+extraVolumes: []
+# extraVolumes:
+# - name: mySecretVolume
+#   secret:
+#     secretName: mySecret
+# - name: myConfigMapVolume
+#   configMap:
+#     name: myConfigMap
+extraVolumeMounts: []
+# extraVolumeMounts:
+# - name: mySecretVolume
+#   mountPath: /locust/secrets/mySecretVolume/
+extraEnvs: []
+# extraEnvs:
+# - name: HELLO
+#   value: WORLD
+# - name: MY_SECRET
+#   valueFrom:
+#     secretKeyRef:
+#       name: mySecret
+#       key: mySecretKey
+
+ingress:
+  enabled: true
+  hosts:
+    - chart-example.local
+    
+  tls: []
+  annotations:
+    kubernetes.io/ingress.class: addon-http-application-routing
+    ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    ingress.kubernetes.io/rewrite-target: "/"
+    nginx.ingress.kubernetes.io/rewrite-target: "/"
+
+master:
+  config:
+    target-host: https://site.example.com
+  resources:
+    limits:
+      cpu: 700m
+      memory: 1024Mi
+    requests:
+      cpu: 500m
+      memory: 128Mi
+  nodeSelector: {}
+    # kops.k8s.io/instancegroup: master
+  tolerations: {}
+  # - key: "application"
+  #   operator: "Equal"
+  #   value: "api"
+  #   effect: "NoSchedule"
+worker:
+  config:
+
+    # Optional parameter to use an existing configmap instead of deploying one with the Chart
+    # configmapName: locust-worker-configs
+
+    # all files from specified configmap (or tasks folder) are mounted under `/locust-tasks`
+    locust-script: "/locust-tasks/locustfile.py"
+    # locust-script: "/locust-tasks/tasks.py"
+  replicaCount: 2
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 700m
+      memory: 256Mi
+  nodeSelector: {}
+    # kops.k8s.io/instancegroup: worker
+  tolerations: {}
+  # - key: "application"
+  #   operator: "Equal"
+  #   value: "api"
+  #   effect: "NoSchedule"
