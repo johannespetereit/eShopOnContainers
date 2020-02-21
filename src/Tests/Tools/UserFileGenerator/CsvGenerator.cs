@@ -10,7 +10,7 @@ namespace UserFileGenerator
         {
             return string.Join(",", new string[]
             {
-                "cardholdername","cardnumber","cardtype","city","country","email","expiration","lastname","name","phonenumber","username","zipcode","state","street","securitynumber","normalizedemail","normalizedusername","password"
+                "CardHolderName","CardNumber","CardType","City","Country","Email","Expiration","LastName","Name","PhoneNumber","UserName","ZipCode","State","Street","SecurityNumber","NormalizedEmail","NormalizedUserName","Password"
             });
         }
 
