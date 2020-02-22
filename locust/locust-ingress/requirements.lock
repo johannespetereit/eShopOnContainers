@@ -1,0 +1,6 @@
+dependencies:
+- name: locust
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 1.1.3
+digest: sha256:ea170d6dd12b6762d4368127fdbafb37cd729b520d0b1e81a7ad16d1f47205ca
+generated: "2020-02-21T22:20:04.1126078+01:00"

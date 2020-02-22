@@ -65,7 +65,7 @@ function Build-Locust{
         [switch]$Interactive
     )
     pushd
-    $target = "$Path\locust\helm\stable\locust\tasks"
+    $target = "$Path\locust\locust-ingress\tasks"
     cp "$Path\src\Services\Identity\Identity.API\Setup\Users.csv" $target
     cp "$Path\locust\*.py" $target
     if ($Interactive.IsPresent) {
@@ -73,7 +73,10 @@ function Build-Locust{
     }
     else{
         $baseUrl = kubectl get ing eshop-identity-api -o=jsonpath='{.spec.rules[0].host}'
-        helm upgrade --install locust-nymph --set master.config.target-host="http://$baseUrl" "$path\locust\helm\stable\locust" -f "$path\locust\values.yaml" --set "ingress.hosts={$baseUrl}"
+        helm upgrade --install locust --set master.config.target-host="http://$baseUrl" "$path\locust\locust-ingress" -f "$path\locust\locust-ingress\values.yaml" --set "ingress.hosts={$baseUrl}"
     }
+
+    # kubectl get pods -n kube-system -o=name | grep addon-http-application-routing
+
     popd
 }
