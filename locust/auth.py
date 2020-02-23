@@ -40,6 +40,9 @@ def oauth_login(client, username, password):
     }, name='/identity/Account/Login')
     guard_response(resp)
 
+    if not resp.ok:
+        return None
+        
     parsed = urlparse(resp.url)
     access_token = parse_qs(parsed.fragment)["access_token"][0]
     return access_token
