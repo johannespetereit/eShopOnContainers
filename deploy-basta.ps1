@@ -1,31 +1,37 @@
 function Set-Cluster{
-    az account set -s DAK-EU-Development
-    kubectl config use-context AKS-DAK-EU-ARM-Development-202-DAKApp2
+    param([ValidateSet('app','locust')]$app = 'app')
+    if ($app -eq 'app'){
+        az account set -s "Visual Studio Enterprise"
+        kubectl config use-context aks-eshop
+    }
+    else{
+        az account set -s "DAK-EU-Development"
+        kubectl config use-context AKS-DAK-EU-ARM-Development-202-DAKApp2
+    }
 }
-
 function Start-Site{
     $baseUrl = kubectl get ing eshop-identity-api -o=jsonpath='{.spec.rules[0].host}'
     Start-Process "http://$baseUrl/"
     Start-Process "http://$baseUrl/webstatus/hc-ui#/healthchecks"
 }
 function Build-All{
-    Set-Cluster
     param($Path = "D:\dev\basta\eShopOnContainers")
+    Set-Cluster
     pushd
     cd "$Path\src"
     $env:REGISTRY = "jpetereit/eshop-"
     docker-compose build
     docker images --format "{{.Repository}}" | grep jpetereit/eshop- | %{ docker push $_ }
     cd "$Path\deploy\k8s\helm"
-    .\deploy-all.ps1 -externalDns aks -aksName "AKS-DAK-EU-ARM-Development-202-DAKApp2" -aksRg "RG-202-ARM-Development" -imageTag linux-latest -useMesh $false -registry "jpetereit"
+    .\deploy-all.ps1 -externalDns aks -aksName "aks-eshop" -aksRg "basta" -imageTag linux-latest -useMesh $false -registry "jpetereit"
 
     kubectl apply -f aks-httpaddon-cfg.yaml
     kubectl delete pod $(kubectl get pod -l app=addon-http-application-routing-nginx-ingress -n kube-system -o jsonpath="{.items[0].metadata.name}") -n kube-system
     popd
 }
 function Build-Identity {
-    Set-Cluster
     param($Path = "D:\dev\basta\eShopOnContainers\src")
+    Set-Cluster
     pushd
     cd $Path
     docker build . -f Services\Identity\Identity.API\Dockerfile -t "jpetereit/eshop-identity.api:linux-latest"
@@ -37,15 +43,6 @@ function Build-Identity {
     popd
 }
 
-
-<#
-cd "D:\dev\basta\eShopOnContainers\deploy\k8s\helm"
-kubectl create clusterrolebinding kubernetes-dashboard -n kube-system --clusterrole=cluster-admin --serviceaccount=kube-system:kubernetes-dashboard
-#>
-
-# .\deploy-all.ps1 -externalDns aks -aksName "AKS-DAK-EU-ARM-Development-202-DAKApp2" -aksRg "RG-202-ARM-Development" -imageTag dev -useMesh $false
-
-# allow large headers
 function Generate-Users{
     param(
         $Path = "D:\dev\basta\eShopOnContainers",
@@ -55,7 +52,7 @@ function Generate-Users{
     cd "$Path\src\Tests\Tools\UserFileGenerator"
     dotnet publish -r win-x64 -c release
     cd "$Path\src\Tests\Tools\UserFileGenerator\bin\release\netcoreapp3.1\win-x64\publish"
-    UserFileGenerator.exe $count > "$Path\src\Services\Identity\Identity.API\Setup\Users.csv"
+    .\UserFileGenerator.exe $count > "$Path\src\Services\Identity\Identity.API\Setup\Users.csv"
     popd
     
 }
@@ -72,8 +69,10 @@ function Build-Locust{
         python "$target\locustfile.py" -i
     }
     else{
+        Set-Cluster -app app
         $baseUrl = kubectl get ing eshop-identity-api -o=jsonpath='{.spec.rules[0].host}'
-        helm upgrade --install locust --set master.config.target-host="http://$baseUrl" "$path\locust\locust-ingress" -f "$path\locust\locust-ingress\values.yaml" --set "ingress.hosts={$baseUrl}"
+        Set-Cluster -app locust
+        helm upgrade --install locust --set locust.master.config.target-host="http://$baseUrl" "$path\locust\locust-ingress" -f "$path\locust\locust-ingress\values.yaml" --set "ingress.hosts={}"
     }
 
     # kubectl get pods -n kube-system -o=name | grep addon-http-application-routing
