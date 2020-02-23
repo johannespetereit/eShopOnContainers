@@ -16,13 +16,18 @@ function Start-Site{
     Start-Process "http://$baseUrl/webstatus/hc-ui#/healthchecks"
 }
 function Build-All{
-    param($Path = "D:\dev\basta\eShopOnContainers")
+    param(
+        $Path = "D:\dev\basta\eShopOnContainers",
+        [switch]$Rebuild
+    )
     Set-Cluster
     pushd
-    cd "$Path\src"
-    $env:REGISTRY = "jpetereit/eshop-"
-    docker-compose build
-    docker images --format "{{.Repository}}" | grep jpetereit/eshop- | %{ docker push $_ }
+    if ($Rebuild.IsPresent){
+        cd "$Path\src"
+        $env:REGISTRY = "jpetereit/eshop-"
+        docker-compose build
+        docker images --format "{{.Repository}}" | grep jpetereit/eshop- | %{ docker push $_ }
+    }
     cd "$Path\deploy\k8s\helm"
     .\deploy-all.ps1 -externalDns aks -aksName "aks-eshop" -aksRg "basta" -imageTag linux-latest -useMesh $false -registry "jpetereit"
 
