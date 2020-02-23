@@ -281,3 +281,4 @@ src/**/inf.yaml
 *.deb1
 *.deb.1
 */**/.config
+locust/locust-ingress/tasks/*
