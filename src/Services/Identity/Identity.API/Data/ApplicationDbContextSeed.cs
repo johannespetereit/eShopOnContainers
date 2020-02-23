@@ -30,10 +30,6 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Data
                 var useCustomizationData = settings.Value.UseCustomizationData;
                 var contentRootPath = env.ContentRootPath;
                 var webroot = env.WebRootPath;
-                logger.LogInformation($"deleting {context.Users.Count()} users...");
-                context.Users.RemoveRange(context.Users);
-                context.SaveChanges();
-                logger.LogInformation($"deleted users.");
                 if (!context.Users.Any())
                 {
                     logger.LogInformation($"Adding Users...");
