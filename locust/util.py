@@ -20,5 +20,4 @@ def guard_response(response):
     dump(response.url, response)
     if (response.status_code > 299):
         short_text = response.text if len(response.text) < 200 else response.text[0:200]
-        print('error', response.status_code,response.request.method, response.url, short_text)
-        raise Exception(response.status_code, short_text, response)
+        print(f"error {response.status_code} {response.request.method} {response.url} {short_text}")
