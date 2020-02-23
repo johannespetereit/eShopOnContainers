@@ -10,6 +10,7 @@ function Set-Cluster{
     }
 }
 function Start-Site{
+    Set-Cluster
     $baseUrl = kubectl get ing eshop-identity-api -o=jsonpath='{.spec.rules[0].host}'
     Start-Process "http://$baseUrl/"
     Start-Process "http://$baseUrl/webstatus/hc-ui#/healthchecks"
@@ -52,7 +53,8 @@ function Generate-Users{
     cd "$Path\src\Tests\Tools\UserFileGenerator"
     dotnet publish -r win-x64 -c release
     cd "$Path\src\Tests\Tools\UserFileGenerator\bin\release\netcoreapp3.1\win-x64\publish"
-    .\UserFileGenerator.exe $count > "$Path\src\Services\Identity\Identity.API\Setup\Users.csv"
+    $users = @(.\UserFileGenerator.exe $count)
+    [IO.File]::WriteAllLines("$Path\src\Services\Identity\Identity.API\Setup\Users.csv", ($users |? {$_.Trim() -ne ""} ))
     popd
     
 }

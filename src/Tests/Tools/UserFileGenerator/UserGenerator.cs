@@ -12,7 +12,12 @@ namespace UserFileGenerator
             var faker = new Faker<User>()
                 .StrictMode(true)
                 .RuleFor(u => u.CardHolderName, f => f.Name.FullName())
-                .RuleFor(u => u.CardNumber, f => f.Finance.CreditCardNumber())
+                .RuleFor(u => u.CardNumber, f => {
+                    var number = f.Finance.CreditCardNumber();
+                    if (number.Length > 19)
+                        number = number.Remove(19);
+                    return number;
+                })
                 .RuleFor(u => u.CardType, f => f.Random.Number(1, 3))
                 .RuleFor(u => u.City, f => f.Address.City())
                 .RuleFor(u => u.Country, f => f.Address.Country())
