@@ -65,4 +65,8 @@
     <Folder Include="Extensions\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\ApplicationInsightsExtensions\ApplicationInsightsExtensions.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -34,8 +34,9 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using GrpcBasket;
-using Microsoft.AspNetCore.Http.Features;
-using Serilog;
+using Basket.API;
+using Microsoft.ApplicationInsights.Extensibility;
+using ApplicationInsightsExtensions;
 
 namespace Microsoft.eShopOnContainers.Services.Basket.API
 {
@@ -51,12 +52,13 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddGrpc(options =>
+            services
+                .AddAppInsightsAndTelemetry(Configuration)
+                .AddGrpc(options =>
             {
                 options.EnableDetailedErrors = true;
             });
 
-            RegisterAppInsights(services);
 
             services.AddControllers(options =>
                 {
@@ -245,12 +247,6 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API
             });
 
             ConfigureEventBus(app);
-        }
-
-        private void RegisterAppInsights(IServiceCollection services)
-        {
-            services.AddApplicationInsightsTelemetry(Configuration);
-            services.AddApplicationInsightsKubernetesEnricher();
         }
 
         private void ConfigureAuthService(IServiceCollection services)

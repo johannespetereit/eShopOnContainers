@@ -1,4 +1,5 @@
-﻿using Devspaces.Support;
+﻿using ApplicationInsightsExtensions;
+using Devspaces.Support;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -40,7 +41,7 @@ namespace Microsoft.eShopOnContainers.WebMVC
         {
             services.AddControllersWithViews()
                 .Services
-                .AddAppInsight(Configuration)
+                .AddAppInsightsAndTelemetry(Configuration)
                 .AddHealthChecks(Configuration)
                 .AddCustomMvc(Configuration)
                 .AddDevspaces()
@@ -108,15 +109,6 @@ namespace Microsoft.eShopOnContainers.WebMVC
 
     static class ServiceCollectionExtensions
     {
-
-        public static IServiceCollection AddAppInsight(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddApplicationInsightsTelemetry(configuration);
-            services.AddApplicationInsightsKubernetesEnricher();
-
-            return services;
-        }
-
         public static IServiceCollection AddHealthChecks(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHealthChecks()

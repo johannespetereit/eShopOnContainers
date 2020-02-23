@@ -105,6 +105,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\ApplicationInsightsExtensions\ApplicationInsightsExtensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <TypeScriptCompile Include="Client\environments\environment.prod.ts" />
     <TypeScriptCompile Include="Client\environments\environment.ts" />
     <TypeScriptCompile Include="Client\guid.ts" />

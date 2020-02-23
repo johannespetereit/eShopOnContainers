@@ -1,5 +1,6 @@
 ﻿namespace Microsoft.eShopOnContainers.Services.Ordering.API
 {
+    using ApplicationInsightsExtensions;
     using AspNetCore.Http;
     using Autofac;
     using Autofac.Extensions.DependencyInjection;
@@ -51,12 +52,12 @@
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services
+                .AddAppInsightsAndTelemetry(Configuration)
                 .AddGrpc(options =>
                 {
                     options.EnableDetailedErrors = true;
                 })
                 .Services
-                .AddApplicationInsights(Configuration)
                 .AddCustomMvc()
                 .AddHealthChecks(Configuration)
                 .AddCustomDbContext(Configuration)
@@ -162,14 +163,6 @@
 
     static class CustomExtensionsMethods
     {
-        public static IServiceCollection AddApplicationInsights(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddApplicationInsightsTelemetry(configuration);
-            services.AddApplicationInsightsKubernetesEnricher();
-
-            return services;
-        }
-
         public static IServiceCollection AddCustomMvc(this IServiceCollection services)
         {
             // Add framework services.

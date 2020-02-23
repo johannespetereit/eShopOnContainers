@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using ApplicationInsightsExtensions;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using HealthChecks.UI.Client;
 using Locations.API.Controllers;
@@ -40,9 +41,9 @@ namespace Microsoft.eShopOnContainers.Services.Locations.API
 
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            RegisterAppInsights(services);
-
-            services.AddCustomHealthCheck(Configuration);
+            services
+                .AddAppInsightsAndTelemetry(Configuration)
+                .AddCustomHealthCheck(Configuration);
 
             services.AddControllers(options =>
                 {
@@ -198,12 +199,6 @@ namespace Microsoft.eShopOnContainers.Services.Locations.API
 
             LocationsContextSeed.SeedAsync(app, loggerFactory)
                 .Wait();
-        }
-
-        private void RegisterAppInsights(IServiceCollection services)
-        {
-            services.AddApplicationInsightsTelemetry(Configuration);
-            services.AddApplicationInsightsKubernetesEnricher();
         }
 
         private void ConfigureAuthService(IServiceCollection services)

@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using ApplicationInsightsExtensions;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using HealthChecks.UI.Client;
 using IdentityServer4.Services;
@@ -36,10 +37,10 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            RegisterAppInsights(services);
-
             // Add framework services.
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services
+                .AddAppInsightsAndTelemetry(Configuration)
+                .AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(Configuration["ConnectionString"],
                     sqlServerOptionsAction: sqlOptions =>
                     {
@@ -169,12 +170,6 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API
                     Predicate = r => r.Name.Contains("self")
                 });
             });
-        }
-
-        private void RegisterAppInsights(IServiceCollection services)
-        {
-            services.AddApplicationInsightsTelemetry(Configuration);
-            services.AddApplicationInsightsKubernetesEnricher();
         }
     }
 }

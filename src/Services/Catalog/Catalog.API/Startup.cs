@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using ApplicationInsightsExtensions;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Catalog.API.Grpc;
 using global::Catalog.API.Infrastructure.Filters;
@@ -11,7 +12,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.eShopOnContainers.BuildingBlocks.EventBus;
 using Microsoft.eShopOnContainers.BuildingBlocks.EventBus.Abstractions;
 using Microsoft.eShopOnContainers.BuildingBlocks.EventBusRabbitMQ;
@@ -46,7 +46,8 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddAppInsight(Configuration)
+            services
+                .AddAppInsightsAndTelemetry(Configuration)
                 .AddGrpc().Services
                 .AddCustomMVC(Configuration)
                 .AddCustomDbContext(Configuration)
@@ -128,13 +129,6 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API
 
     public static class CustomExtensionMethods
     {
-        public static IServiceCollection AddAppInsight(this IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddApplicationInsightsTelemetry(configuration);
-            services.AddApplicationInsightsKubernetesEnricher();
-
-            return services;
-        }
 
         public static IServiceCollection AddCustomMVC(this IServiceCollection services, IConfiguration configuration)
         {

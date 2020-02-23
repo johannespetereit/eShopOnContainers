@@ -50,6 +50,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\ApplicationInsightsExtensions\ApplicationInsightsExtensions.csproj" />
     <ProjectReference Include="..\..\BuildingBlocks\Devspaces.Support\Devspaces.Support.csproj" />
   </ItemGroup>
 
