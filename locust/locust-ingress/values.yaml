@@ -60,14 +60,14 @@ locust:
     config:
       configmapName: eshop-locustfile
       locust-script: "/locust-tasks/locustfile.py"
-      replicaCount: 2
-      resources:
-        limits:
-          cpu: 1000m
-          memory: 1024Mi
-        requests:
-          cpu: 700m
-          memory: 256Mi
+    replicaCount: 4
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1024Mi
+      requests:
+        cpu: 700m
+        memory: 256Mi
       nodeSelector: {}
         # kops.k8s.io/instancegroup: worker
       tolerations: {}
@@ -82,10 +82,10 @@ locust:
     resources:
       limits:
         cpu: 700m
-        memory: 1024Mi
+        memory: 2048Mi
       requests:
         cpu: 500m
-        memory: 128Mi
+        memory: 512Mi
     nodeSelector: {}
       # kops.k8s.io/instancegroup: master
     tolerations: {}
