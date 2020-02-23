@@ -1,4 +1,5 @@
 ﻿using Catalog.API.IntegrationEvents;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopOnContainers.Services.Catalog.API.Infrastructure;
@@ -20,14 +21,16 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
     {
         private readonly CatalogContext _catalogContext;
         private readonly CatalogSettings _settings;
+        private readonly TelemetryClient _telemetry;
         private readonly ICatalogIntegrationEventService _catalogIntegrationEventService;
 
-        public CatalogController(CatalogContext context, IOptionsSnapshot<CatalogSettings> settings, ICatalogIntegrationEventService catalogIntegrationEventService)
+        public CatalogController(CatalogContext context, IOptionsSnapshot<CatalogSettings> settings, ICatalogIntegrationEventService catalogIntegrationEventService,
+            TelemetryClient telemetry)
         {
             _catalogContext = context ?? throw new ArgumentNullException(nameof(context));
             _catalogIntegrationEventService = catalogIntegrationEventService ?? throw new ArgumentNullException(nameof(catalogIntegrationEventService));
             _settings = settings.Value;
-
+            _telemetry = telemetry;
             context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
@@ -48,6 +51,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
                     return BadRequest("ids value invalid. Must be comma-separated list of numbers");
                 }
 
+                _telemetry.TrackEvent("Queried Items");
                 return Ok(items);
             }
 
@@ -92,6 +96,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
 
             items = ChangeUriPlaceholder(items);
 
+            _telemetry.TrackEvent("Queried Items");
             return items;
         }
 
@@ -140,6 +145,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
 
             itemsOnPage = ChangeUriPlaceholder(itemsOnPage);
 
+            _telemetry.TrackEvent("Queried Items");
             return new PaginatedItemsViewModel<CatalogItem>(pageIndex, pageSize, totalItems, itemsOnPage);
         }
 
@@ -168,6 +174,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
 
             itemsOnPage = ChangeUriPlaceholder(itemsOnPage);
 
+            _telemetry.TrackEvent("Queried Items");
             return new PaginatedItemsViewModel<CatalogItem>(pageIndex, pageSize, totalItems, itemsOnPage);
         }
 
@@ -194,6 +201,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
 
             itemsOnPage = ChangeUriPlaceholder(itemsOnPage);
 
+            _telemetry.TrackEvent("Queried Items");
             return new PaginatedItemsViewModel<CatalogItem>(pageIndex, pageSize, totalItems, itemsOnPage);
         }
 

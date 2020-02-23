@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.ApplicationInsights;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopOnContainers.Web.Shopping.HttpAggregator.Models;
 using Microsoft.eShopOnContainers.Web.Shopping.HttpAggregator.Services;
@@ -17,10 +18,13 @@ namespace Microsoft.eShopOnContainers.Web.Shopping.HttpAggregator.Controllers
     {
         private readonly IBasketService _basketService;
         private readonly IOrderingService _orderingService;
-        public OrderController(IBasketService basketService, IOrderingService orderingService)
+        private readonly TelemetryClient _telemetry;
+        public OrderController(IBasketService basketService, IOrderingService orderingService,
+            TelemetryClient telemetry)
         {
             _basketService = basketService;
             _orderingService = orderingService;
+            _telemetry = telemetry;
         }
 
         [Route("draft/{basketId}")]

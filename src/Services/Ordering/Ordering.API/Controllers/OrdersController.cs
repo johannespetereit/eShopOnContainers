@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopOnContainers.BuildingBlocks.EventBus.Extensions;
@@ -24,17 +25,21 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
         private readonly IOrderQueries _orderQueries;
         private readonly IIdentityService _identityService;
         private readonly ILogger<OrdersController> _logger;
+        private readonly TelemetryClient _telemetry;
 
         public OrdersController(
             IMediator mediator, 
             IOrderQueries orderQueries, 
             IIdentityService identityService,
-            ILogger<OrdersController> logger)
+            ILogger<OrdersController> logger,
+            TelemetryClient telemetry
+            )
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _orderQueries = orderQueries ?? throw new ArgumentNullException(nameof(orderQueries));
             _identityService = identityService ?? throw new ArgumentNullException(nameof(identityService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _telemetry = telemetry;
         }
 
         [Route("cancel")]
@@ -63,7 +68,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
             {
                 return BadRequest();
             }
-
+            _telemetry.TrackEvent("Canceled Order");
             return Ok();
         }
 
@@ -94,6 +99,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
                 return BadRequest();
             }
 
+            _telemetry.TrackEvent("Shipped Order!");
             return Ok();
         }
 
@@ -109,6 +115,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
                 //var order customer = await _mediator.Send(new GetOrderByIdQuery(orderId));
                 var order = await _orderQueries.GetOrderAsync(orderId);
 
+                _telemetry.TrackEvent("Get Order");
                 return Ok(order);
             }
             catch
@@ -124,6 +131,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
             var userid = _identityService.GetUserIdentity();
             var orders = await _orderQueries.GetOrdersFromUserAsync(Guid.Parse(userid));
 
+            _telemetry.TrackEvent("Get Orders");
             return Ok(orders);
         }
 

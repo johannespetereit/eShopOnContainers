@@ -1,5 +1,6 @@
 ﻿using Basket.API.IntegrationEvents.Events;
 using Basket.API.Model;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopOnContainers.BuildingBlocks.EventBus.Abstractions;
@@ -45,11 +46,12 @@ namespace UnitTest.Basket.Application
             _serviceBusMock.Setup(x => x.Publish(It.IsAny<UserCheckoutAcceptedIntegrationEvent>()));
 
             //Act
+            var telemetryMock = new Mock<TelemetryClient>();
             var basketController = new BasketController(
                 _loggerMock.Object,
                 _basketRepositoryMock.Object,
                 _identityServiceMock.Object,
-                _serviceBusMock.Object);
+                _serviceBusMock.Object, telemetryMock.Object);
 
             var actionResult = await basketController.GetBasketByIdAsync(fakeCustomerId);
 
@@ -71,11 +73,12 @@ namespace UnitTest.Basket.Application
             _serviceBusMock.Setup(x => x.Publish(It.IsAny<UserCheckoutAcceptedIntegrationEvent>()));
 
             //Act
+            var telemetryMock = new Mock<TelemetryClient>();
             var basketController = new BasketController(
                 _loggerMock.Object,
                 _basketRepositoryMock.Object,
                 _identityServiceMock.Object,
-                _serviceBusMock.Object);
+                _serviceBusMock.Object, telemetryMock.Object);
 
             var actionResult = await basketController.UpdateBasketAsync(fakeCustomerBasket);
 
@@ -93,11 +96,12 @@ namespace UnitTest.Basket.Application
             _identityServiceMock.Setup(x => x.GetUserIdentity()).Returns(fakeCustomerId);
 
             //Act
+            var telemetryMock = new Mock<TelemetryClient>();
             var basketController = new BasketController(
                 _loggerMock.Object,
                 _basketRepositoryMock.Object,
                 _identityServiceMock.Object,
-                _serviceBusMock.Object);
+                _serviceBusMock.Object, telemetryMock.Object);
 
             var result = await basketController.CheckoutAsync(new BasketCheckout(), Guid.NewGuid().ToString()) as BadRequestResult;
             Assert.NotNull(result);
@@ -113,12 +117,13 @@ namespace UnitTest.Basket.Application
                  .Returns(Task.FromResult(fakeCustomerBasket));
 
             _identityServiceMock.Setup(x => x.GetUserIdentity()).Returns(fakeCustomerId);
+            var telemetryMock = new Mock<TelemetryClient>();
 
             var basketController = new BasketController(
                 _loggerMock.Object,
                 _basketRepositoryMock.Object,
                 _identityServiceMock.Object,
-                _serviceBusMock.Object);
+                _serviceBusMock.Object, telemetryMock.Object);
 
             basketController.ControllerContext = new ControllerContext()
             {

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopOnContainers.Services.Ordering.API.Application.Commands;
 using Microsoft.eShopOnContainers.Services.Ordering.API.Application.Queries;
@@ -37,8 +38,9 @@ namespace UnitTest.Ordering.Application
             _mediatorMock.Setup(x => x.Send(It.IsAny<IdentifiedCommand<CancelOrderCommand, bool>>(), default(CancellationToken)))
                 .Returns(Task.FromResult(true));
 
+            var telemetryMock = new Mock<TelemetryClient>();
             //Act
-            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object);
+            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object, telemetryMock.Object);
             var actionResult = await orderController.CancelOrderAsync(new CancelOrderCommand(1), Guid.NewGuid().ToString()) as OkResult;
 
             //Assert
@@ -54,7 +56,8 @@ namespace UnitTest.Ordering.Application
                 .Returns(Task.FromResult(true));
 
             //Act
-            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object);
+            var telemetryMock = new Mock<TelemetryClient>();
+            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object, telemetryMock.Object);
             var actionResult = await orderController.CancelOrderAsync(new CancelOrderCommand(1), String.Empty) as BadRequestResult;
 
             //Assert
@@ -69,7 +72,8 @@ namespace UnitTest.Ordering.Application
                 .Returns(Task.FromResult(true));
 
             //Act
-            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object);
+            var telemetryMock = new Mock<TelemetryClient>();
+            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object, telemetryMock.Object);
             var actionResult = await orderController.ShipOrderAsync(new ShipOrderCommand(1), Guid.NewGuid().ToString()) as OkResult;
 
             //Assert
@@ -85,7 +89,8 @@ namespace UnitTest.Ordering.Application
                 .Returns(Task.FromResult(true));
 
             //Act
-            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object);
+            var telemetryMock = new Mock<TelemetryClient>();
+            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object, telemetryMock.Object);
             var actionResult = await orderController.ShipOrderAsync(new ShipOrderCommand(1), String.Empty) as BadRequestResult;
 
             //Assert
@@ -105,7 +110,8 @@ namespace UnitTest.Ordering.Application
                 .Returns(Task.FromResult(fakeDynamicResult));
 
             //Act
-            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object);
+            var telemetryMock = new Mock<TelemetryClient>();
+            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object, telemetryMock.Object);
             var actionResult = await orderController.GetOrdersAsync();
 
             //Assert
@@ -122,7 +128,8 @@ namespace UnitTest.Ordering.Application
                 .Returns(Task.FromResult(fakeDynamicResult));
 
             //Act
-            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object);
+            var telemetryMock = new Mock<TelemetryClient>();
+            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object, telemetryMock.Object);
             var actionResult = await orderController.GetOrderAsync(fakeOrderId) as OkObjectResult;
 
             //Assert
@@ -137,8 +144,9 @@ namespace UnitTest.Ordering.Application
             _orderQueriesMock.Setup(x => x.GetCardTypesAsync())
                 .Returns(Task.FromResult(fakeDynamicResult));
 
+            var telemetryMock = new Mock<TelemetryClient>();
             //Act
-            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object);
+            var orderController = new OrdersController(_mediatorMock.Object, _orderQueriesMock.Object, _identityServiceMock.Object, _loggerMock.Object, telemetryMock.Object);
             var actionResult = await orderController.GetCardTypesAsync();
 
             //Assert

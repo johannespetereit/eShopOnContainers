@@ -1,5 +1,6 @@
 ﻿using Basket.API.IntegrationEvents.Events;
 using Basket.API.Model;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopOnContainers.BuildingBlocks.EventBus.Abstractions;
@@ -22,18 +23,22 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         private readonly IBasketRepository _repository;
         private readonly IIdentityService _identityService;
         private readonly IEventBus _eventBus;
+        private readonly TelemetryClient _telemetry;
         private readonly ILogger<BasketController> _logger;
 
         public BasketController(
             ILogger<BasketController> logger,
             IBasketRepository repository,
             IIdentityService identityService,
-            IEventBus eventBus)
+            IEventBus eventBus,
+            TelemetryClient telemetry
+            )
         {
             _logger = logger;
             _repository = repository;
             _identityService = identityService;
             _eventBus = eventBus;
+            _telemetry = telemetry;
         }
 
         [HttpGet("{id}")]
@@ -41,6 +46,8 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         public async Task<ActionResult<CustomerBasket>> GetBasketByIdAsync(string id)
         {
             var basket = await _repository.GetBasketAsync(id);
+            _telemetry.TrackEvent("showing basket");
+            _logger.LogInformation("show basket");
 
             return Ok(basket ?? new CustomerBasket(id));
         }
@@ -49,6 +56,8 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         [ProducesResponseType(typeof(CustomerBasket), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<CustomerBasket>> UpdateBasketAsync([FromBody]CustomerBasket value)
         {
+            _logger.LogInformation("update basket");
+            _telemetry.TrackEvent("Updated basket");
             return Ok(await _repository.UpdateBasketAsync(value));
         }
 
@@ -89,6 +98,8 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
 
                 throw;
             }
+            _logger.LogInformation("checkout");
+            _telemetry.TrackEvent("Checked out!");
 
             return Accepted();
         }

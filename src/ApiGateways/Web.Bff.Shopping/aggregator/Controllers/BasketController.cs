@@ -9,6 +9,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Serilog;
 using Newtonsoft.Json;
+using Microsoft.ApplicationInsights;
 
 namespace Microsoft.eShopOnContainers.Web.Shopping.HttpAggregator.Controllers
 {
@@ -19,11 +20,14 @@ namespace Microsoft.eShopOnContainers.Web.Shopping.HttpAggregator.Controllers
     {
         private readonly ICatalogService _catalog;
         private readonly IBasketService _basket;
+        private readonly TelemetryClient _telemetry;
 
-        public BasketController(ICatalogService catalogService, IBasketService basketService)
+        public BasketController(ICatalogService catalogService, IBasketService basketService,
+            TelemetryClient telemetry)
         {
             _catalog = catalogService;
             _basket = basketService;
+            _telemetry = telemetry;
         }
 
         [HttpPost]
@@ -36,6 +40,7 @@ namespace Microsoft.eShopOnContainers.Web.Shopping.HttpAggregator.Controllers
             {
                 return BadRequest("Need to pass at least one basket line");
             }
+            _telemetry.TrackEvent("Update Basket");
 
             // Retrieve the current basket
             var basket = await _basket.GetById(data.BuyerId) ?? new BasketData(data.BuyerId);
@@ -158,6 +163,7 @@ namespace Microsoft.eShopOnContainers.Web.Shopping.HttpAggregator.Controllers
                 });
             }
 
+            _telemetry.TrackEvent("Update Basket");
             // Step 5: Update basket
             await _basket.UpdateAsync(currentBasket);
 

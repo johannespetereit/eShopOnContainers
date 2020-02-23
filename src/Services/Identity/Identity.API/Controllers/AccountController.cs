@@ -8,6 +8,7 @@ using IdentityServer4;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -34,6 +35,7 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly TelemetryClient _telemetry;
 
         public AccountController(
 
@@ -43,7 +45,8 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Controllers
             IClientStore clientStore,
             ILogger<AccountController> logger,
             UserManager<ApplicationUser> userManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            TelemetryClient telemetry)
         {
             _loginService = loginService;
             _interaction = interaction;
@@ -51,6 +54,7 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Controllers
             _logger = logger;
             _userManager = userManager;
             _configuration = configuration;
+            _telemetry = telemetry;
         }
 
         /// <summary>
@@ -103,7 +107,7 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Controllers
                     };
 
                     await _loginService.SignInAsync(user, props);
-
+                    _telemetry.TrackEvent("Logged in");
                     // make sure the returnUrl is still valid, and if yes - redirect back to authorize endpoint
                     if (_interaction.IsValidReturnUrl(model.ReturnUrl))
                     {
@@ -210,6 +214,8 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Controllers
                     {
                         RedirectUri = url
                     });
+                    _telemetry.TrackEvent("Logged out");
+
                 }
                 catch (Exception ex)
                 {
@@ -248,6 +254,8 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Controllers
         public IActionResult Register(string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+            _telemetry.TrackEvent("Registering");
+
             return View();
         }
 
@@ -280,6 +288,7 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Controllers
                     SecurityNumber = model.User.SecurityNumber
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
+
                 if (result.Errors.Count() > 0)
                 {
                     AddErrors(result);
@@ -287,6 +296,7 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Controllers
                     return View(model);
                 }
             }
+            _telemetry.TrackEvent("Registered");
 
             if (returnUrl != null)
             {

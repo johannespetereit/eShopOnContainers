@@ -1,4 +1,5 @@
 ﻿using Catalog.API.IntegrationEvents;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopOnContainers.Services.Catalog.API;
@@ -48,9 +49,10 @@ namespace UnitTest.Catalog.Application
             var catalogSettings = new TestCatalogSettings();
 
             var integrationServicesMock = new Mock<ICatalogIntegrationEventService>();
+            var telemetryMock = new Mock<TelemetryClient>();
 
             //Act
-            var orderController = new CatalogController(catalogContext, catalogSettings, integrationServicesMock.Object);
+            var orderController = new CatalogController(catalogContext, catalogSettings, integrationServicesMock.Object, telemetryMock.Object);
             var actionResult = await orderController.ItemsByTypeIdAndBrandIdAsync(typesFilterApplied, brandFilterApplied, pageSize, pageIndex);
 
             //Assert
