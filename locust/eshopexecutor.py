@@ -23,30 +23,36 @@ class EShopExecutor(Executor):
     def update_product_list_simple(self):
         page = str(random.randint(0,1))
         resp = self.get("/webshoppingapigw/c/api/v1/catalog/items?pageIndex=" + page + "&pageSize=10", name='/webshoppingapigw/c/api/v1/catalog/items?pageIndex=[page]')
-        self.last_displayed_products = json.loads(resp.text)["data"]
+        if resp.ok:
+            self.last_displayed_products = json.loads(resp.text)["data"]
 
     def update_product_list(self):
         prod_brand = str(random.randint(1,4))
         prod_type = str(random.randint(1,4))
         resp = self.get("/webshoppingapigw/c/api/v1/catalog/items/type/" + prod_type + "/brand/" + prod_brand + "?pageIndex=0&pageSize=10", name='/webshoppingapigw/c/api/v1/catalog/items/type/[type]/brand/[brand]?pageIndex=0&pageSize=10')
-        self.last_displayed_products = json.loads(resp.text)["data"]
+        if resp.ok:
+            self.last_displayed_products = json.loads(resp.text)["data"]
 
     def show_login(self):
         self.get("/identity/Account/Login")
 
     def perform_login(self):
         if self.is_logged_in or not self.can_log_in: return
-        username = self.locust.user_info["Email"]
+        username = self.locust.user_info['Email']
         password = self.locust.user_info["Password"]
         self.access_token = oauth_login(self.locust.client, username, password)
-        self.auth = 'Bearer ' + self.access_token
-        self.headers = {'Authorization': self.auth}
-        self.is_logged_in = True
-        self.login_expiration = self.get_expiration_time(self.access_token)
-        # these calls always happen after login
-        resp = self.get("/identity/connect/userinfo")
-        self.basket_id = json.loads(resp.text)["sub"]
-        self.get("/Home/Configuration")
+        if self.access_token != None:
+            self.auth = 'Bearer ' + self.access_token
+            self.headers = {'Authorization': self.auth}
+            self.is_logged_in = True
+            self.login_expiration = self.get_expiration_time(self.access_token)
+            # these calls always happen after login
+            resp = self.get("/identity/connect/userinfo")
+            if resp.ok:
+                self.basket_id = json.loads(resp.text)["sub"]
+                self.get("/Home/Configuration")
+        else: 
+            self.show_index()
 
     def give_up_login(self):
         self.show_index()
@@ -86,7 +92,8 @@ class EShopExecutor(Executor):
     def show_basket(self):
         self.get("/basket")
         resp = self.get('/webshoppingapigw/b/api/v1/basket/' + self.basket_id, name='/webshoppingapigw/b/api/v1/basket')
-        self.has_items_in_basket = len(json.loads(resp.text)["items"]) != 0
+        if resp.ok:
+            self.has_items_in_basket = len(json.loads(resp.text)["items"]) != 0
     
     def show_checkout(self):
         self.get("/order")
@@ -104,20 +111,23 @@ class EShopExecutor(Executor):
             "cardnumber": user["CardNumber"],
             "cardsecuritynumber": user["SecurityNumber"],
             "cardtypeid": user["CardType"],
-            "cardholdername": user["CardHolderName"] if "CardHolderName" in user else user["\ufeffCardHolderName"],
+            "cardholdername": user["CardHolderName"],
             "total": 0,
             "expiration": user["Expiration"]
         }, headers={'x-requestid': str(uuid.uuid4())})
-        self.show_orders()
+        if resp.ok:
+            self.show_orders()
     
     def show_orders(self):
         self.get("/orders")
         resp = self.get("/webshoppingapigw/o/api/v1/orders")
-        self.has_orders = len(json.loads(resp.text)) != 0
+        if resp.ok:
+            self.has_orders = len(json.loads(resp.text)) != 0
     
     def show_order_detail(self):
         resp = self.get("/webshoppingapigw/o/api/v1/orders")
-        orders = json.loads(resp.text)
-        if len(orders) == 0: return
-        random.shuffle(orders)
-        resp = self.get("/webshoppingapigw/o/api/v1/orders/" + str(orders[0]["ordernumber"]))
+        if resp.ok:
+            orders = json.loads(resp.text)
+            if len(orders) == 0: return
+            random.shuffle(orders)
+            resp = self.get("/webshoppingapigw/o/api/v1/orders/" + str(orders[0]["ordernumber"]))

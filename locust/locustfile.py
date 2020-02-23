@@ -25,31 +25,31 @@ def read_users(path = 'Users.csv'):
         path = os.path.join(dir, path)
 
     try:
-        with codecs.open(path, 'r', 'utf-16-le') as csv_file:
+        with codecs.open(path, 'r', 'utf-8') as csv_file:
             reader = csv.DictReader(csv_file)
             for row in reader:
                 users.append(row)
-        print('users loaded from @', path)
+        print(f"users loaded from @{path}")
     except FileNotFoundError:
-        print('no users found @', path)
+        print(f"no users found @{path}")
         users = []
     random.shuffle(users)
     return users
 
 users = read_users()
 user_index = 0
-
 class WebsiteUser(HttpLocust):
     def __init__(self, tasksToPerform=TrafficTasks):
         WebsiteUser.task_set = tasksToPerform
         global user_index, users
         self.user_info = None
         user_index += 1
+        user_index = user_index % len(users)
         if user_index < len(users):
-            print("setting user", str(user_index), users[user_index]["Email"])
+            print(f"setting user {str(user_index)} {users[user_index]['Email']}")
             self.user_info = users[user_index]
         else:
-            print("too many users", str(user_index), ", available:", len(users))
+            print(f"too many users: {user_index}, available: {len(users)}")
             self.user_info = {'Email': 'anonymous'}
 
         self.executor = EShopExecutor(self)
@@ -57,12 +57,12 @@ class WebsiteUser(HttpLocust):
     host = 'http://eshop.ef3cf9d0e1b34a7d845f.westeurope.aksapp.io'
     task_set = []
     # task_set = TestTasks
-    wait_time = between(4, 12)
+    wait_time = between(4, 60)
 WebsiteUser.task_set = TrafficTasks
 
 def interactive_locust(users_file = 'Users.csv'):
     global users
     if users_file != None:
         users = read_users(users_file)
-    x = WebsiteUser(TestTasks)
+    x = WebsiteUser(TrafficTasks)
     x.run()

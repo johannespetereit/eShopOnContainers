@@ -15,13 +15,13 @@ class Executor:
             still_logged_in = self.login_expiration > datetime.now()
             if not still_logged_in:
                 self.is_logged_in = False
-                print("session for", self.locust.user_info["Email"], "has expired")
-        print("    ", method, inspect.stack()[2].function, "for", self.locust.user_info["Email"])
+                print(f"session for {self.locust.user_info['Email']} has expired")
+        print(f"    {method} {inspect.stack()[2].function} for {self.locust.user_info['Email']}")
 
     def after_call(self, response):
         guard_response(response)
         if self.debug:
-            print(response.status_code, response.request.method, response.url)
+            print(f"{response.status_code}, {response.request.method}, {response.url}")
 
 
     def get(self, url, name=None):
@@ -52,4 +52,4 @@ class Executor:
         return now + timedelta(hours=1)
         
     def log_call(self):
-        print("    debug:" + inspect.stack()[1].function)
+        print(f"    debug: {inspect.stack()[1].function}")

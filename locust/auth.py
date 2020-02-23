@@ -21,6 +21,8 @@ def oauth_login(client, username, password):
     authorize_url = "/identity/connect/authorize?response_type=id_token%20token&client_id=js&redirect_uri=" + client.base_url + "/&scope=openid%20profile%20orders%20basket%20marketing%20locations%20webshoppingagg%20orders.signalrhub&nonce=N0." + nonce + "&state=" + state
     resp = client.get(authorize_url, name='/identity/connect/authorize')
     guard_response(resp)
+    if not resp.ok:
+        return None
     regex = '__RequestVerificationToken.*?value\=\\"(.*?)\\"'
     token = re.search(regex, resp.text).group(1)
     print(token)
