@@ -43,7 +43,7 @@ class EShopExecutor(Executor):
         self.access_token = oauth_login(self.locust.client, username, password)
         if self.access_token != None:
             self.auth = 'Bearer ' + self.access_token
-            self.headers = {'Authorization': self.auth}
+            self.headers['Authorization'] = self.auth
             self.is_logged_in = True
             self.login_expiration = self.get_expiration_time(self.access_token)
             # these calls always happen after login

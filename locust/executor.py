@@ -7,7 +7,7 @@ class Executor:
         super().__init__()
         self.debug = debug
         self.locust = locust
-        self.headers = {}
+        self.headers = {'User-Agent': self.locust.user_agent}
         self.is_logged_in = False
 
     def before_call(self, method):
