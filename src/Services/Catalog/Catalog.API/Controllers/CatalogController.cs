@@ -72,7 +72,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
             }
 
             */
-
+            _telemetry.TrackPageView("Items");
             itemsOnPage = ChangeUriPlaceholder(itemsOnPage);
 
             var model = new PaginatedItemsViewModel<CatalogItem>(pageIndex, pageSize, totalItems, itemsOnPage);
@@ -151,17 +151,17 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
 
         // GET api/v1/[controller]/items/type/1/brand[?pageSize=3&pageIndex=10]
         [HttpGet]
-        [Route("items/type/{catalogTypeId}/brand/{catalogBrandId:int?}")]
+        [Route("items/type/{catalogTypeId}/brand/{catalogBrandId}")]
         [ProducesResponseType(typeof(PaginatedItemsViewModel<CatalogItem>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<PaginatedItemsViewModel<CatalogItem>>> ItemsByTypeIdAndBrandIdAsync(int catalogTypeId, int? catalogBrandId, [FromQuery]int pageSize = 10, [FromQuery]int pageIndex = 0)
+        public async Task<ActionResult<PaginatedItemsViewModel<CatalogItem>>> ItemsByTypeIdAndBrandIdAsync(string catalogTypeId, string catalogBrandId, [FromQuery]int pageSize = 10, [FromQuery]int pageIndex = 0)
         {
             var root = (IQueryable<CatalogItem>)_catalogContext.CatalogItems;
 
-            root = root.Where(ci => ci.CatalogTypeId == catalogTypeId);
+            root = root.Where(ci => ci.CatalogTypeId == int.Parse(catalogTypeId));
 
-            if (catalogBrandId.HasValue)
+            if (!string.IsNullOrEmpty(catalogBrandId))
             {
-                root = root.Where(ci => ci.CatalogBrandId == catalogBrandId);
+                root = root.Where(ci => ci.CatalogBrandId == int.Parse(catalogBrandId));
             }
 
             var totalItems = await root
@@ -174,7 +174,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
 
             itemsOnPage = ChangeUriPlaceholder(itemsOnPage);
 
-            _telemetry.TrackEvent("Queried Items");
+            _telemetry.TrackPageView("ItemsByTypeAndBrand");
             return new PaginatedItemsViewModel<CatalogItem>(pageIndex, pageSize, totalItems, itemsOnPage);
         }
 
@@ -201,7 +201,7 @@ namespace Microsoft.eShopOnContainers.Services.Catalog.API.Controllers
 
             itemsOnPage = ChangeUriPlaceholder(itemsOnPage);
 
-            _telemetry.TrackEvent("Queried Items");
+            _telemetry.TrackEvent("ItemsByBrand");
             return new PaginatedItemsViewModel<CatalogItem>(pageIndex, pageSize, totalItems, itemsOnPage);
         }
 

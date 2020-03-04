@@ -28,8 +28,8 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
         private readonly TelemetryClient _telemetry;
 
         public OrdersController(
-            IMediator mediator, 
-            IOrderQueries orderQueries, 
+            IMediator mediator,
+            IOrderQueries orderQueries,
             IIdentityService identityService,
             ILogger<OrdersController> logger,
             TelemetryClient telemetry
@@ -105,7 +105,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
 
         [Route("{orderId:int}")]
         [HttpGet]
-        [ProducesResponseType(typeof(Order),(int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Order), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult> GetOrderAsync(int orderId)
         {
@@ -115,7 +115,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
                 //var order customer = await _mediator.Send(new GetOrderByIdQuery(orderId));
                 var order = await _orderQueries.GetOrderAsync(orderId);
 
-                _telemetry.TrackEvent("Get Order");
+                _telemetry.TrackPageView("ShowOrder");
                 return Ok(order);
             }
             catch
@@ -131,7 +131,7 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.API.Controllers
             var userid = _identityService.GetUserIdentity();
             var orders = await _orderQueries.GetOrdersFromUserAsync(Guid.Parse(userid));
 
-            _telemetry.TrackEvent("Get Orders");
+            _telemetry.TrackPageView("ShowOrders");
             return Ok(orders);
         }
 

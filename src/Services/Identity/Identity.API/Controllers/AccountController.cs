@@ -72,6 +72,7 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Controllers
             var vm = await BuildLoginViewModelAsync(returnUrl, context);
 
             ViewData["ReturnUrl"] = returnUrl;
+            _telemetry.TrackPageView("Login");
 
             return View(vm);
         }
@@ -169,6 +170,7 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Controllers
             }
 
             //Test for Xamarin. 
+            _telemetry.TrackEvent("Logout");
             var context = await _interaction.GetLogoutContextAsync(logoutId);
             if (context?.ShowSignoutPrompt == false)
             {
@@ -255,6 +257,7 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API.Controllers
         {
             ViewData["ReturnUrl"] = returnUrl;
             _telemetry.TrackEvent("Registering");
+            _telemetry.TrackPageView("Register");
 
             return View();
         }

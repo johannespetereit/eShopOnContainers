@@ -46,8 +46,7 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         public async Task<ActionResult<CustomerBasket>> GetBasketByIdAsync(string id)
         {
             var basket = await _repository.GetBasketAsync(id);
-            _telemetry.TrackEvent("showing basket");
-            _logger.LogInformation("show basket");
+            _telemetry.TrackPageView("showing basket");
 
             return Ok(basket ?? new CustomerBasket(id));
         }
@@ -56,7 +55,6 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
         [ProducesResponseType(typeof(CustomerBasket), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<CustomerBasket>> UpdateBasketAsync([FromBody]CustomerBasket value)
         {
-            _logger.LogInformation("update basket");
             _telemetry.TrackEvent("Updated basket");
             return Ok(await _repository.UpdateBasketAsync(value));
         }
@@ -76,7 +74,9 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API.Controllers
 
             if (basket == null)
             {
-                return BadRequest();
+                // only for BASTA
+                return Ok();
+                //return BadRequest();
             }
 
             var userName = this.HttpContext.User.FindFirst(x => x.Type == ClaimTypes.Name).Value;

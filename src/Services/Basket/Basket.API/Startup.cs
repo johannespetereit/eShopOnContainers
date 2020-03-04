@@ -194,7 +194,7 @@ namespace Microsoft.eShopOnContainers.Services.Basket.API
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             //loggerFactory.AddAzureWebAppDiagnostics();
-            //loggerFactory.AddApplicationInsights(app.ApplicationServices, LogLevel.Trace);
+            loggerFactory.AddApplicationInsights(app.ApplicationServices, LogLevel.Warning);
 
             var pathBase = Configuration["PATH_BASE"];
             if (!string.IsNullOrEmpty(pathBase))

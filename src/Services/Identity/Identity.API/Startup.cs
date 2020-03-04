@@ -124,7 +124,7 @@ namespace Microsoft.eShopOnContainers.Services.Identity.API
             //loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             //loggerFactory.AddDebug();
             //loggerFactory.AddAzureWebAppDiagnostics();
-            //loggerFactory.AddApplicationInsights(app.ApplicationServices, LogLevel.Trace);
+            loggerFactory.AddApplicationInsights(app.ApplicationServices, LogLevel.Warning);
 
             if (env.IsDevelopment())
             {

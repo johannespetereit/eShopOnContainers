@@ -1,4 +1,5 @@
 ﻿using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopOnContainers.Web.Shopping.HttpAggregator.Models;
@@ -44,7 +45,8 @@ namespace Microsoft.eShopOnContainers.Web.Shopping.HttpAggregator.Controllers
             {
                 return BadRequest($"No basket found for id {basketId}");
             }
-
+            _telemetry.TrackPageView("draft");
+            
             return await _orderingService.GetOrderDraftAsync(basket);
         }
     }
