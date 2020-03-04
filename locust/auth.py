@@ -16,15 +16,21 @@ def get_openid_nonce():
 
 
 def oauth_login(client, username, password):
+    client.cookies.clear()
     state = get_oauth_state()
     nonce = get_openid_nonce()
     authorize_url = "/identity/connect/authorize?response_type=id_token%20token&client_id=js&redirect_uri=" + client.base_url + "/&scope=openid%20profile%20orders%20basket%20marketing%20locations%20webshoppingagg%20orders.signalrhub&nonce=N0." + nonce + "&state=" + state
     resp = client.get(authorize_url, name='/identity/connect/authorize')
     guard_response(resp)
+    
     if not resp.ok:
-        return None
+        return [None, None]
     regex = '__RequestVerificationToken.*?value\=\\"(.*?)\\"'
-    token = re.search(regex, resp.text).group(1)
+    try:
+        token = re.search(regex, resp.text).group(1)
+    except:
+        print(resp.text)
+        raise Exception('Error response from authorize controller', resp.text)
     print(token)
     
     # get returnurl parameter
@@ -41,8 +47,9 @@ def oauth_login(client, username, password):
     guard_response(resp)
 
     if not resp.ok:
-        return None
+        return [None,None]
         
     parsed = urlparse(resp.url)
     access_token = parse_qs(parsed.fragment)["access_token"][0]
-    return access_token
+    id_token = parse_qs(parsed.fragment)["id_token"][0]
+    return access_token, id_token

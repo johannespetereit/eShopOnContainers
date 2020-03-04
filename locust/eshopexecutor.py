@@ -2,6 +2,7 @@ import random, uuid
 from auth import oauth_login
 from executor import Executor
 import json
+from _datetime import datetime, timedelta
 
 class EShopExecutor(Executor):
     def __init__(self, locust, debug = False):
@@ -32,15 +33,31 @@ class EShopExecutor(Executor):
         resp = self.get("/webshoppingapigw/c/api/v1/catalog/items/type/" + prod_type + "/brand/" + prod_brand + "?pageIndex=0&pageSize=10", name='/webshoppingapigw/c/api/v1/catalog/items/type/[type]/brand/[brand]?pageIndex=0&pageSize=10')
         if resp.ok:
             self.last_displayed_products = json.loads(resp.text)["data"]
+            
+    def update_product_list_invalid_type(self):
+        prod_brand = str(random.randint(1,4))
+        resp = self.get("/webshoppingapigw/c/api/v1/catalog/items/type/null/brand/" + prod_brand + "?pageIndex=0&pageSize=10", name='/webshoppingapigw/c/api/v1/catalog/items/type/null/brand/[brand]?pageIndex=0&pageSize=10')
+            
+    def update_product_list_invalid_brand(self):
+        prod_type = str(random.randint(1,4))
+        resp = self.get("/webshoppingapigw/c/api/v1/catalog/items/type/" + prod_type + "/brand/null?pageIndex=0&pageSize=10", name='/webshoppingapigw/c/api/v1/catalog/items/type/[type]/brand/null?pageIndex=0&pageSize=10')
 
     def show_login(self):
         self.get("/identity/Account/Login")
+
+    def perform_logout(self):
+        resp = self.get("/identity/connect/endsession?id_token_hint=" + self.id_token, name='/identity/connect/endsession')
+        self.locust.client.cookies.clear()
+        self.headers['Authorization'] = None
+        self.is_logged_in = False
+        self.login_expiration = datetime.now() + timedelta(hours=12)
+        self.locust.choose_user()
 
     def perform_login(self):
         if self.is_logged_in or not self.can_log_in: return
         username = self.locust.user_info['Email']
         password = self.locust.user_info["Password"]
-        self.access_token = oauth_login(self.locust.client, username, password)
+        self.access_token, self.id_token = oauth_login(self.locust.client, username, password)
         if self.access_token != None:
             self.auth = 'Bearer ' + self.access_token
             self.headers['Authorization'] = self.auth
@@ -91,6 +108,8 @@ class EShopExecutor(Executor):
     
     def show_basket(self):
         self.get("/basket")
+        if not self.basket_id:
+            return
         resp = self.get('/webshoppingapigw/b/api/v1/basket/' + self.basket_id, name='/webshoppingapigw/b/api/v1/basket')
         if resp.ok:
             self.has_items_in_basket = len(json.loads(resp.text)["items"]) != 0
@@ -130,4 +149,4 @@ class EShopExecutor(Executor):
             orders = json.loads(resp.text)
             if len(orders) == 0: return
             random.shuffle(orders)
-            resp = self.get("/webshoppingapigw/o/api/v1/orders/" + str(orders[0]["ordernumber"]))
+            resp = self.get("/webshoppingapigw/o/api/v1/orders/" + str(orders[0]["ordernumber"]), name='/webshoppingapigw/o/api/v1/orders/[order_number]')

@@ -11,10 +11,19 @@ class TestTasks(TaskSet):
         self.locust.executor.perform_login()
     @task
     def task(self):
+        self.locust.executor.perform_logout()
         self.locust.executor.update_product_list_simple()
         self.locust.executor.add_to_basket()
-        self.locust.executor.perform_checkout()
-        self.locust.executor.show_order_detail()
+        self.locust.executor.perform_login()
+        self.locust.executor.update_product_list_simple()
+        self.locust.executor.add_to_basket()
+        self.locust.executor.perform_logout()
+        self.locust.executor.update_product_list_simple()
+        self.locust.executor.add_to_basket()
+        self.locust.executor.perform_login()
+        self.locust.executor.perform_login()
+        self.locust.executor.update_product_list_simple()
+        self.locust.executor.add_to_basket()
 
 
 
@@ -56,34 +65,34 @@ user_agents = [ r"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (
                 r"Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
                 r"Mozilla/5.0 (Linux; Android 6.0.1; SAMSUNG SM-G570Y Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/4.0 Chrome/44.0.2403.133 Mobile Safari/537.36"
 ]
-users = read_users()
-user_index = 0
-class WebsiteUser(HttpLocust):
-    def __init__(self, tasksToPerform=TrafficTasks):
-        global user_index, users, user_agents
-        self.user_agent = random.choice(user_agents)
-        WebsiteUser.task_set = tasksToPerform
-        self.user_info = None
-        user_index += 1
-        user_index = user_index % len(users)
-        if user_index < len(users):
-            print(f"setting user {str(user_index)} {users[user_index]['Email']}")
-            self.user_info = users[user_index]
-        else:
-            print(f"too many users: {user_index}, available: {len(users)}")
-            self.user_info = {'Email': 'anonymous'}
 
+
+users = read_users()
+class WebsiteUser(HttpLocust):
+    host = 'http://eshop.5f925ea136544e4cb450.westeurope.aksapp.io'
+    task_set = []
+    wait_time = between(4, 60)
+
+    def __init__(self, tasksToPerform=TrafficTasks):
+        global users, user_agents
+        self.user_agent_choices = user_agents
+        self.user_choices = users
+        WebsiteUser.task_set = tasksToPerform
+        self.choose_user()
         self.executor = EShopExecutor(self)
         super().__init__()
-    host = 'http://eshop.ef3cf9d0e1b34a7d845f.westeurope.aksapp.io'
-    task_set = []
-    # task_set = TestTasks
-    wait_time = between(4, 60)
+
+    def choose_user(self):
+        user = random.choice(self.user_choices)
+        print(f"setting user {user['Email']}")
+        self.user_info = user
+        self.user_agent = random.choice(self.user_agent_choices)
+
 WebsiteUser.task_set = TrafficTasks
 
 def interactive_locust(users_file = 'Users.csv'):
     global users
     if users_file != None:
         users = read_users(users_file)
-    x = WebsiteUser(TrafficTasks)
+    x = WebsiteUser(TestTasks)
     x.run()

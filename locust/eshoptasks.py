@@ -1,7 +1,11 @@
 from locust import TaskSet, task, seq_task
+import random
+import time
 
 class TrafficTasks(TaskSet):
     def on_start(self):
+        # sleep random interval - this is because on spawning, somhow users get bursted
+        time.sleep(random.rand(1,30))
         pass
 
     @task(70)
@@ -21,7 +25,30 @@ class TrafficTasks(TaskSet):
         @task(7)
         def stop_browsing(self):
             self.interrupt()
-
+        
+    @task(10)
+    class ProduceError(TaskSet):
+        def on_start(self):
+            if random.randint(0,3) == 3:
+                self.interrupt()
+        @seq_task(1)
+        def update_product_list_simple(self):
+            self.locust.executor.update_product_list_simple()
+        @seq_task(2)
+        class AppIsBroken(TaskSet):
+            @task(50)
+            def update_product_list_invalid_brand(self):
+                self.locust.executor.update_product_list_invalid_brand()
+            @task(50)
+            def update_product_list_invalid_type(self):
+                self.locust.executor.update_product_list_invalid_type()
+            @task(30)
+            def give_up(self):
+                self.locust.executor.show_index()
+                self.interrupt()
+        @seq_task(3)
+        def give_up(self):
+            self.interrupt()
             
     @task(50)
     class Shop(TaskSet):
@@ -34,6 +61,12 @@ class TrafficTasks(TaskSet):
         @task(20)
         def add_to_basket(self):
             self.locust.executor.add_to_basket()
+        
+        @task(80)
+        def logout(self):
+            self.locust.executor.perform_logout()
+            self.interrupt()
+
         @task(30)
         def reload_shop(self):
             self.locust.executor.show_index()
@@ -55,11 +88,11 @@ class TrafficTasks(TaskSet):
         @task(12)
         def show_order_detail(self):
             self.locust.executor.show_order_detail()
-        @task(10)
+        @task(20)
         def goto_checkout(self):
             self.locust.executor.show_checkout()
     
-    @task(30)
+    @task(12)
     class Checkout(TaskSet):
         def on_start(self):
             if not self.locust.executor.is_logged_in or not self.locust.executor.has_items_in_basket:
